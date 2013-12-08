@@ -1,0 +1,37 @@
+
+// 注意：不要定义这个，如果定义的不正确，否则依赖可能会出问题
+// group = 'com.someok.common'
+
+// jar包的名字
+archivesBaseName = 'someok-module1'
+
+eclipse {
+	project {
+		name = 'someok-module1'
+	}
+}
+
+
+dependencies {
+
+    compile (
+        
+        // 依赖 module0，所以moudule0 依赖的所有组件均可省略
+        // 
+        project(':projects:someok-module0:source'),
+
+        libraries.'persistence-api',
+
+    )
+
+    // 把父项目的libs下的所有jar和当前项目的libs下的所有jar都搞进来
+    // 因为有些时候 maven 库中有些jar是不存在的，这些jar就得手工维护了
+    // 
+    // 注意：这些libs目录是允许有子目录存在的
+    // 
+    ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
+    ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
+    ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
+
+    compile jarTree    
+}

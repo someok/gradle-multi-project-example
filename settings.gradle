@@ -1,0 +1,18 @@
+rootProject.name = 'MyProjects'
+
+// 
+// 所有子项目
+// 
+// 可以每行一个 include，也可以一行搞定（逗号分割）
+// 不过后者看着不够清爽，所以这儿采用每行一个的模式
+// 
+// 另外，这儿定义的每个子目录里面有两个文件夹：doc、source
+// 前者用来放置文档，后者用于放置源码
+// 所以定义的时候直接指定 :source
+// 
+include 'projects:someok-module0:source'
+include 'projects:someok-module1:source'
+include 'projects:someok-module2:source'
+
+include 'projects:someok-one-web:source'
+include 'projects:someok-two-web:source'

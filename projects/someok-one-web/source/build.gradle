@@ -1,0 +1,111 @@
+// 只在 web 项目下定义这两个插件
+// 
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+
+archivesBaseName = 'someok-one-web'
+
+eclipse {
+	project {
+		name = 'Someok One Web'
+	}
+
+	wtp {
+	    component {
+	      	//you can configure the context path:
+	      	contextPath = 'one'
+
+	      	deployName = 'Someok One Web'
+	  	}
+	}
+}
+
+war {
+    manifest {
+        attributes("Implementation-Title": "Gradle")
+    }
+}
+
+dependencies {
+
+    // providedCompile 是在 war 插件下定义的
+    // 
+	providedCompile (
+        libraries.'servlet-api',
+        libraries.'jsp-api'
+    )
+
+    compile (
+
+        // 依赖 module0、1 两个项目
+        // 
+        project(':projects:someok-module0:source'),
+        project(':projects:someok-module1:source'),
+
+
+        libraries.'spring-jdbc',
+        libraries.'spring-tx',
+        // libraries.'spring-context',
+
+        libraries.'spring-orm',
+        // libraries.'spring-oxm',
+        libraries.'spring-webmvc',
+        libraries.'spring-jms',
+        libraries.'spring-aspects',
+
+        // Spring Security 
+        // 
+        libraries.'spring-security-web',
+        libraries.'spring-security-config',
+        // libraries.'spring-security-taglibs',
+
+        // Cache 
+        // 
+        libraries.'ehcache-core',
+
+        // Other 
+        // 
+        libraries.'joda-time',
+        libraries.'xstream',
+        libraries.'mail',
+        
+    )
+
+    // 把父项目的libs下的所有jar和当前项目的libs下的所有jar都搞进来
+    // 因为有些时候 maven 库中有些jar是不存在的，这些jar就得手工维护了
+    // 
+    // 注意：这些libs目录是运行有子目录存在的
+    // 
+    ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
+    ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
+    ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
+
+    compile jarTree
+}
+
+task release(dependsOn: 'war', description: 'Build production war.') << {
+    println 'profile: ' + profile
+}
+
+gradle.taskGraph.whenReady {taskGraph ->
+    
+    // 执行release 的时候将其 profile 置为生产状态
+    // 执行war 的时候则是开发状态，且版本后面加上snapshot标记
+    if (taskGraph.hasTask(release)) {
+        ext.profile = 'prod'
+    } else {
+    	ext.profile = 'dev'
+        version += '-SNAPSHOT'
+    }
+    
+    // 根据 profile 的不同，将会包含不同的资源目录
+    // 
+    sourceSets {
+        main {
+            resources {
+                srcDirs = ["src/main/resources", "src/main/resources-${profile}"]
+            }
+        }
+    }
+
+}

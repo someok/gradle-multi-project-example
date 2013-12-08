@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="someok-two-web" version="3.0">
+
+<web-app>
+   <display-name>someok-two-web</display-name>
+   
+   <description>
+         Describe the someok-two-web Webapp here.
+   </description>
+   
+   <!-- General description of your web application -->
+   <display-name>someok-two-web - Webapp</display-name>
+      <description>
+         Describe the eb-china-web Webapp here.
+         wjx@example.com
+
+         See http://tomcat.apache.org/tomcat-6.0-doc/appdev/web.xml.txt for more information
+         regarding this Web Descriptor File.
+   </description>
+</web-app>
