@@ -50,9 +50,9 @@ dependencies {
     // 
     // 注意：这些libs目录是允许有子目录存在的
     // 
-    ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
-    ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
-    ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
+    // ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
+    // ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
+    // ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
 
-    compile jarTree    
+    // compile jarTree    
 }

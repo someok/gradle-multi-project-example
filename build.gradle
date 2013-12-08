@@ -113,6 +113,12 @@ subprojects {
             libraries.'log4j-over-slf4j'
         )
 
+        ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
+        ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
+        ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
+
+        compile jarTree
+
         // 
         // 测试依赖
         // 

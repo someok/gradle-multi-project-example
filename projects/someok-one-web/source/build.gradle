@@ -76,11 +76,11 @@ dependencies {
     // 
     // 注意：这些libs目录是运行有子目录存在的
     // 
-    ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
-    ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
-    ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
+    // ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
+    // ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
+    // ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
 
-    compile jarTree
+    // compile jarTree
 }
 
 task release(dependsOn: 'war', description: 'Build production war.') << {
@@ -97,8 +97,12 @@ gradle.taskGraph.whenReady {taskGraph ->
     	ext.profile = 'dev'
         version += '-SNAPSHOT'
     }
-    
+
     // 根据 profile 的不同，将会包含不同的资源目录
+    // 
+    // 在执行 gradle eclipse 的时候会默认为是 dev 模式，所以会把
+    // resources和 resources-dev 两个目录作为资源目录
+    // 这也符合开发时候的需要
     // 
     sourceSets {
         main {

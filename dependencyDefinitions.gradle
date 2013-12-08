@@ -25,7 +25,7 @@ ext.libraries = [
         "ebean": "org.avaje.ebeanorm:avaje-ebeanorm:3.2.4",
         "persistence-api": "javax.persistence:persistence-api:1.0",
 
-        "aspectjweaver": "org.aspectj:aspectjweaver:1.7.2",
+        "aspectjweaver": "org.aspectj:aspectjweaver:1.7.4",
 
         // spring 3.1.2 
         // 
@@ -92,7 +92,7 @@ ext.libraries = [
 
         // Cache 
         // 
-        "ehcache-core": "net.sf.ehcache:ehcache-core:2.5.1",
+        "ehcache-core": "net.sf.ehcache:ehcache-core:2.6.6",
 
         // Mail 
         // 
