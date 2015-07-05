@@ -1,0 +1,27 @@
+apply plugin: 'maven'
+
+// 注意：不要定义这个，如果定义的不正确，否则依赖可能会出问题
+// group = 'cn.anytech.enterprise'
+
+// jar包的名字
+archivesBaseName = 'project-business'
+
+eclipse {
+	project {
+		name = 'project-business'
+	}
+}
+
+
+dependencies {
+
+    compile (
+        libraries.'servlet-api',
+        libraries.'jsp-api',
+
+
+        project(':project-common'),
+
+    )
+
+}

@@ -1,137 +1,433 @@
-apply plugin: 'java'
+/*
+	gradle 主文件
 
-// 用于检测依赖的包是否有更新
-apply plugin: 'versions'    
-// apply plugin: "sonar-runner"
+	部分内容参考： https://gist.github.com/dirkraft/8230302
 
+ */
+
+import java.text.SimpleDateFormat
+import org.apache.tools.ant.taskdefs.condition.Os
+
+// ant 定义，用来定义 ebean enchance
+ant.taskdef(name: "ebeanEnhance",
+              classname: "com.avaje.ebean.enhance.ant.AntEnhanceTask",
+              classpath: "tools/ebean/avaje-ebeanorm-agent-4.5.3.jar")
+
+/**
+ * 用于执行 grunt 任务
+ *
+ * 来自:
+ * http://blog.crisp.se/2013/04/30/yassalsundman/test-driving-javascript-grunt-with-gradle
+ */
+class GruntTask extends Exec {
+   private String gruntExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "grunt.cmd" : "grunt"
+   def gruntArgs = ""
+
+   public GruntTask() {
+       super()
+       this.setExecutable(gruntExecutable)
+   }
+
+   public void setGruntArgs(String gruntArgs) {
+       this.args = "$gruntArgs".trim().split(" ") as List
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Settings
+ext {
+    // Project constants
+    github_org = 'organization'
+    project_group = 'com.example'
+    project_name = 'OneLevelProjects'
+    //project_version = '0.0.1-SNAPSHOT'
+    project_description = 'Template for Java, Maven, and IntelliJ with minimum POM requirements for Maven central.'
+
+    project_jdk = '1.8'
+    project_web = '3.0'
+
+
+    /*
+     * Fine tune the POM contents here, particularly, the developers section. Some defaulting behavior is provided
+     * for all other fields based on project constants.
+
+    project_pom = {
+        name project_name
+        description project_description
+        url "https://github.com/${github_org}/${project_name}"
+        licenses {
+            license {
+                name 'MIT License'
+                url 'http://opensource.org/licenses/MIT'
+                distribution 'repo'
+            }
+        }
+        scm {
+            url "https://github.com/${github_org}/${project_name}.git"
+            connection "scm:git:https://github.com/${github_org}/${project_name}.git"
+            developerConnection "scm:git:git@github.com:${github_org}/${project_name}.git"
+        }
+        organization {
+            name github_org
+            url "https://github.com/${github_org}"
+        }
+        developers {
+            developer {
+                id 'developer'
+                name 'developer'
+            }
+        }
+    }*/
+
+    /** 生成 manifest 的方法，在打 jar 包或者 war 包时候调用 */
+    defaultManifest = { proj ->
+
+        return manifest {
+            def buildTimeAndDate = new Date()
+            def buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
+            def buildTime = new SimpleDateFormat('HH:mm').format(buildTimeAndDate)
+
+            def git_cmd = "git rev-parse HEAD"
+            def git_proc = git_cmd.execute()
+
+            attributes 'SCM-Revision': git_proc.text.trim()
+
+            attributes 'Built-By': System.properties['user.name']
+            attributes 'Created-By': System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.getProperty("java.vm.version") + ")"
+            attributes 'Build-Host': InetAddress.localHost.hostName
+            attributes 'Build-Date': buildDate
+            attributes 'Build-Time': buildTime
+            attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
+            attributes 'Specification-Title': proj.archivesBaseName
+            attributes 'Specification-Version': proj.version
+            attributes 'Specification-Vendor': project_group
+            attributes 'Implementation-Title': proj.archivesBaseName
+            attributes 'Implementation-Version': proj.version
+            attributes 'Implementation-Vendor': project_group
+            attributes 'provider': 'gradle'
+        }
+    }
+
+    /** Used where gradle task evaluation would fail because of an undefined value, even if the task wasn't targeted. */
+    defaultBlank = { closure ->
+        try {
+            closure()
+        } catch (MissingPropertyException e) {
+            ''
+        }
+    }
+
+    /**
+     * 子项目中调用，用于生成编译数字，此数字可以作为版本号的一个组成部分。
+     *
+     * 存储位置为子项目下的 build_number.properties,此文件与子项目的 build.gradle 平级
+     */
+    buildNumberIncrease = {
+        def _build_number_file = new File('build_number.properties')
+        def buildNumber = _build_number_file.text.toInteger()
+
+        println '-- Old build number: ' + _build_number_file.text
+        buildNumber++
+        println '-- New build number: ' + buildNumber
+
+        _build_number_file.text = buildNumber
+
+        return buildNumber
+
+    }
+
+    /**
+     * Ebean Model 增强方法，调用的 ant 任务
+     */
+    ebeanEnhance = {dir, packages ->
+        println dir
+        println packages
+        println '============================================'
+        println '  Enhance ebean classes....' + dir
+        println '============================================'
+        ant.ebeanEnhance(classSource: dir,
+                            packages: packages,
+                            transformArgs: "debug=10")
+        println 'Enhance ebean end....................'
+    }
+
+}
+
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'war'
+
+//
 // 引入jar包定义
 // 这个文件中定义的jar包可以直接在子项目中使用，不需要再次使用 apply from 这个语句
-// 
-apply from: 'dependencyDefinitions.gradle'
-
-// ======================================================================================
 //
-// 用于生成项目目录结构
-// https://github.com/townsfolk/gradle-templates
-// 远程速度太慢，所以下载到本地编译，位于 gradle/gradle-templates 下面
-// 
-// 默认的设置是
-// apply from: 'file:///[gradle-templates]/installation/apply-local.groovy'
-// 
-// 不过这个好像需要采用绝对路径才行，相对路径不好使，搞了半天没搞定，
-// 索性把这段代码直接复制过来，反正就是去配置下jar就行了
-// 
-buildscript {
-    repositories {
-        ivy {
-           String tpInstallDir = project.hasProperty('gradle.templates.dir') ? project.getProperty('gradle.templates.dir') :
-                                                                         System.properties['user.dir']
-            name = 'gradle_templates'
-            artifactPattern "${tpInstallDir}/build/libs/[artifact]-[revision].jar"
-        }
+apply from: 'dependency.gradle'
 
-        mavenCentral()
 
-        // mavenLocal()
-    }
-    dependencies {
-        def templatesVersion = project.hasProperty('gradle.templates.ver') ? project.getProperty('gradle.templates.ver') :
-                                                                         project.version
-        classpath "gradle-templates:gradle-templates:${templatesVersion}"
 
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.4'
-    }
-}
-// Check to make sure templates.TemplatesPlugin isn't already added.
-if (!project.plugins.findPlugin(templates.TemplatesPlugin)) {
-    project.apply(plugin: templates.TemplatesPlugin)
-}
-// ======================================================================================
-
-/**
- * 获取属性，如果没有则采用默认值
- */
-def defaultProperty(propertyName, defaultValue) {
-    return hasProperty(propertyName) ? project[propertyName] : defaultValue
+allprojects {
+    //apply plugin: 'license'
 }
 
-//ext.profile = project['profile']
+subprojects { subproj ->
 
-/**
- * 根据命令行输入的参数来判断profile，两种类别：dev（开发环境）、prod（生产环境）
- * 不提供参数表示为dev
- * 
- * 示例：gradle war -Pprofile=prod
- *
- * TODO: 已经没用了，哪天删掉
- */
-def getProfile() {
-    return defaultProperty('profile', 'dev')
-}
 
-// 所有子项目的通用配置
-subprojects { 
+    //group = project_group
+    // 这儿置为空值，否则 idea 生成的依赖包命名以此值开始
+    // 与 gradle 的打包规则有冲突
+    group = ""
+
     apply plugin: 'java'
+    sourceCompatibility = project_jdk
+    targetCompatibility = project_jdk
+
+    apply plugin: 'maven'
+    apply plugin: 'idea'
     apply plugin: 'eclipse'
 
-    // JVM 版本号要求
-    sourceCompatibility = '1.7'
-
-    // java编译的时候缺省状态下会因为中文字符而失败
-    // 所以这儿需要改为utf8
-    // 
-    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-    
     repositories {
         mavenCentral()
+        // maven {url "http://maven.oschina.net/content/groups/public/"}
+        maven {url "http://repos.someok.com/release"}
     }
 
     jar {
-        manifest {
-            attributes("Implementation-Title": "Gradle")
+        excludes = ['**/rebel.xml']
+
+        doFirst {
+            // 生成jar 包的时候按此规则生成 manifest 文件
+            manifest = defaultManifest({subproj})
         }
     }
 
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from 'build/docs/javadoc'
+        doFirst {
+            manifest = defaultManifest({subproj})
+        }
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+        doFirst {
+            manifest = defaultManifest({subproj})
+        }
+    }
+
+    // 编码改为 UTF-8, 否则编译源码的时候会出错
+    // 当然，这个需要根据自己的 java 源码的编码进行调整
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+    //
+    artifacts {
+        archives jar
+        // archives javadocJar
+        archives sourcesJar
+    }
+
+    //
+    // 执行 grunt 编译 js/less 等
+    //
+    task grunt(type: GruntTask) {
+        gruntArgs = "default"
+        // commandLine 'grunt.cmd', 'default'
+    }
 
     configurations {
-        // 
+
+        deployerJars
+
+        //
         // 所有需要忽略的包定义在此
-        // 
+        //
         all*.exclude group: 'commons-httpclient'
         all*.exclude group: 'commons-logging'
         all*.exclude group: 'commons-beanutils', module: 'commons-beanutils'
     }
 
     dependencies {
-        
+    	// 用于上传自己项目的jar 包到中心 maven 库
+        deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
+
+
         //
         // 通用依赖
-        // 
+        //
         compile (
             libraries.'logback-classic',
             libraries.'jcl-over-slf4j',
-            libraries.'log4j-over-slf4j'
+            libraries.'log4j-over-slf4j',
+
+            libraries.'jstl',
+            libraries.'standard',
+
+            libraries.'mysql',
+
+            // ebean
+            libraries.'ebean',
+            libraries.'avaje-agentloader',
+            libraries.'avaje-ebeanorm-agent',
+
+            libraries.'persistence-api',
+            //libraries.'validation-api',
+            libraries.'jta',
+
+            libraries.'hibernate-validator',
+
+            libraries.'spring-jdbc',
+            libraries.'spring-tx',
+            libraries.'spring-context-support',
+
+            libraries.'spring-orm',
+            // libraries.'spring-oxm',
+            libraries.'spring-webmvc',
+            libraries.'spring-jms',
+            libraries.'spring-aspects',
+            libraries.'spring-websocket',
+            libraries.'spring-messaging',
+
+            // Spring Security
+            //
+            libraries.'spring-security-web',
+            libraries.'spring-security-config',
+            libraries.'spring-security-taglibs',
+
+            // Cache
+            //
+            libraries.'ehcache',
+            // Apache
+            //
+            libraries.'commons-dbcp',
+            libraries.'commons-beanutils-core',
+            libraries.'commons-configuration',
+            libraries.'commons-lang3',
+            libraries.'commons-digester3',
+
+            libraries.'commons-fileupload',
+            libraries.'velocity',
+            libraries.'ant',
+
+            libraries.'lucene-core',
+            libraries.'lucene-analyzers-common',
+            libraries.'lucene-analyzers-smartcn',
+            libraries.'lucene-queries',
+            libraries.'lucene-queryparser',
+            libraries.'lucene-highlighter',
+
+            //libraries.'poi',
+            libraries.'jxls-core',
+            //libraries.'jxls-reader',
+
+            libraries.'httpclient',
+            libraries.'httpmime',
+
+            // JSON
+            //
+            libraries.'jackson-databind',
+
+            // Other
+            //
+            libraries.'guava',
+            libraries.'joda-time',
+            libraries.'xstream',
+            libraries.'mail',
+            libraries.'snakeyaml',
+            libraries.'jpinyin'
         )
 
+        //
+        // 引入根目录和各子项目下的libs中的jar包
+        //
         ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
         ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
         ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
 
         compile jarTree
 
-        // 
+        //
         // 测试依赖
-        // 
+        //
         testCompile (
             libraries.'junit',
-            libraries.'spring-test'
+            libraries.'spring-test',
+            libraries.'assertj'
         )
     }
 
+    // 上传 jar 包到自己的 maven 服务器
+    //
+    uploadArchives {
+
+        repositories.mavenDeployer {
+            //beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            configuration = configurations.deployerJars
+            repository(
+                // 这儿需要注意，后面的地址是服务器地址，需要写全，是个大坑啊
+                // 另外初次执行的时候最好带上 --info 参数，会提示保存 ssh 验证信息的
+                // 这时候需要输入 yes
+                //
+                // 更详细说明参见我的 blog: http://my.oschina.net/someok/blog/374562
+                url: //"file://d:/Develop/MyProjects/repos/"
+                    "scp://repos.example.com:22/home/maven/repos/release"
+            )
+            {
+                // If these are not defined assemble needlessly fails for unrelated tasks, hence, defaultBlank.
+                authentication(userName: "maven", password: "maven")
+            }
+
+        }
+    }
+
     // 显示当前项目下所有用于 compile 的 jar.
-    // 
+    //
     task listJars(description: 'Display all compile jars.') << {
         configurations.compile.each { File file -> println file.name }
     }
 
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Misc
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
+
+// 在idea 的 module 中忽略 projects 目录
+// project("projects") {
+//    ideaModule.enabled = false
+// }
+
+
+/**
+ * idea 里面忽略跟项目，也就是说不将根项目设置为 module
+ */
+gradle.projectsEvaluated {
+    gradle.rootProject {
+        ideaModule.enabled = false
+        idea {
+            project {
+                // modules = subprojects*.idea.module
+                // 如果某个子项目的 ideaModule 设置为 false，则不会在 idea 中生成 module
+                def modulesToInclude = subprojects.findAll {it.ideaModule.enabled == true}
+                modules = modulesToInclude.idea.module
+            }
+        }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+    }
+    project {
+        jdkName = project_jdk
+        languageLevel = project_jdk
+        vcs = 'Git'
+    }
+}
+

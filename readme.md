@@ -22,15 +22,23 @@
 
 ### 顶级目录
 
-放置了一堆 Gradle 的配置文件以及 wrapper 等，为了审美的需要，没把各个子项目放置到这个目录下，专门开辟了个 projects 目录用来存放所有项目
+放置了一堆 Gradle 的配置文件以及 wrapper 等，为了审美的需要，没把各个子项目放置到这个目录下，专门开辟了个 projects 目录用来存放所有项目。
+
+> 新版本中取消了 projects 目录，将子项目都提升到了根下，当然，原来的配置方式也可以。
 
 ### projects 目录
 
 实际项目存放的地点。
 
+> 可选项，也可以直接将所有子项目放在根目录下，这也是推荐用法。
+
 每个项目都包含了两个子目录：doc、source，前者用来放置文档，后者为源码。
 
 这些项目也可能是来自不同的仓库，例如 git、subversion 等，不同的项目组可能会下载不同的项目于依赖模块，这时候只需要配置一下顶级目录中的 settings.gradle，管理好 include 即可。
+
+## idea IDE 支持
+
+增加了 idea 支持，子项目为 idea 中的 module。并且可以在 module 中忽略某些子项目，例如根项目、projects 等。
 
 ## 内置插件
 
@@ -38,19 +46,11 @@
 
 - 所有子项目
 	- **eclipse**： 用于生成 eclipse 配置
+	- **idea**: 支持 idea 直接打开项目
 	- **java**
 - Web 子项目
-	- **war**： 用于打 war 包，注意：这儿做了一些处理，war默认打的包带有 SNAPSHOT 后缀，如果想打发布版的 war 包，可采用 gradle release，打开 someok-one-web 的 build.gradle 看看就知道怎么回事了
-	- **eclipse-wtp**： 用于生成 wtp 配置，建议配合 eclipse 的 Gradle 插件使用，很方便地将项目依赖的 jar 作为 eclipse 的 libraries，保持 WEB-INF/lib 目录干净清爽
-
-### 引用的外部插件
-- [versions](https://github.com/ben-manes/gradle-versions-plugin)： 用于检测jar包是否有新版本，命令为 gradle dependencyUpdates
-- [gradle.templates](https://github.com/townsfolk/gradle-templates)： 用于生成项目目录结构，命令较多，可采用 gradle tasks 查看。顶级目录下有个 templates 目录，里面可以自己定义一些模板来代替这个工具的默认模板，我就在里面定义了一个 web.xml，采用的 3.0 版本的定义。
-
-## TODO
-
-- 增加 grunt 插件
-
+	- **snapshot**： 用于打 war 包，注意：这儿做了一些处理，war默认打的包带有 SNAPSHOT 后缀
+	- **release**: 如果想打发布版的 war 包，可采用 gradle release，打开 project-web 的 build.gradle 看看就知道怎么回事了
 
 ----------
 
@@ -58,7 +58,7 @@
 
 ### jar 包定义外移
 
-这个是在查找某个问题的时候在一个国外网站（具体哪个忘记了，查的太多也找不到了）发现的。就是将所有的 jar 的定义放置到了 dependencyDefinitions.gradle 中，然后在顶级目录的 build.gradle 中引入： 
+这个是在查找某个问题的时候在一个国外网站（具体哪个忘记了，查的太多也找不到了）发现的。就是将所有的 jar 的定义放置到了 dependencyDefinitions.gradle 中，然后在顶级目录的 build.gradle 中引入：
 
 > apply from: 'dependencyDefinitions.gradle'
 
@@ -73,7 +73,7 @@
      httpclient: '4.3.1',
  ]
 
- 
+
 ext.libraries = [
 	"servlet-api": "javax.servlet:servlet-api:2.5",
 	"jsp-api": "javax.servlet:jsp-api:2.0",
