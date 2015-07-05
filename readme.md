@@ -36,9 +36,11 @@
 
 这些项目也可能是来自不同的仓库，例如 git、subversion 等，不同的项目组可能会下载不同的项目于依赖模块，这时候只需要配置一下顶级目录中的 settings.gradle，管理好 include 即可。
 
-## idea IDE 支持
+## Idea IDE 支持
 
-增加了 idea 支持，子项目为 idea 中的 module。并且可以在 module 中忽略某些子项目，例如根项目、projects 等。
+增加了 Idea 支持，子项目为 Idea 中的 module。并且可以在 module 中忽略某些子项目，例如根项目、projects 等。
+
+![Idea 抓图](static/snapshort.png)
 
 ## 内置插件
 
@@ -46,7 +48,7 @@
 
 - 所有子项目
 	- **eclipse**： 用于生成 eclipse 配置
-	- **idea**: 支持 idea 直接打开项目
+	- **Idea**: 支持 Idea 直接打开项目
 	- **java**
 - Web 子项目（新增 Task）
 
