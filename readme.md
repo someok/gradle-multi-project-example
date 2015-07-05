@@ -48,7 +48,10 @@
 	- **eclipse**： 用于生成 eclipse 配置
 	- **idea**: 支持 idea 直接打开项目
 	- **java**
-- Web 子项目
+- Web 子项目（新增 Task）
+
+	> 打 war 包的时候版本号做了一些处理，增加了编译数字，例如：project-web.1.1.0.1234.war.
+
 	- **snapshot**： 用于打 war 包，注意：这儿做了一些处理，war默认打的包带有 SNAPSHOT 后缀
 	- **release**: 如果想打发布版的 war 包，可采用 gradle release，打开 project-web 的 build.gradle 看看就知道怎么回事了
 
