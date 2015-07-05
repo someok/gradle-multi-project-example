@@ -1,4 +1,4 @@
-rootProject.name = 'one-level-projects'
+rootProject.name = 'multi-projects'
 
 // 三个子项目
 // 其中 business 依赖 common
