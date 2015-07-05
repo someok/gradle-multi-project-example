@@ -404,7 +404,7 @@ task wrapper(type: Wrapper) {
 
 
 /**
- * idea 里面忽略跟项目，也就是说不将根项目设置为 module
+ * idea 里面忽略根项目，也就是说不将根项目设置为 module
  */
 gradle.projectsEvaluated {
     gradle.rootProject {
