@@ -1,27 +1,7 @@
-//import org.gradle.api.tasks.Exec
-import org.apache.tools.ant.taskdefs.condition.Os
-
 apply plugin: 'war'
-apply plugin: 'eclipse-wtp'
 
 archivesBaseName = 'project-web'
-
-eclipse {
-	project {
-		name = 'project-web'
-	}
-
-	wtp {
-	    component {
-	      	contextPath = 'projectweb'
-	      	deployName = 'Example project web'
-	  	}
-	  	facet {
-            facet name: 'jst.java', version: '1.8'
-            facet name: 'jst.web', version: '3.0'
-        }
-	}
-}
+version = '1.0.0'
 
 //
 // 设置默认 resources 为开发环境状态
@@ -41,79 +21,94 @@ dependencies {
 
     // 因为此项目为 web 项目，所以需要将下述 jar 包设置为 provided
     //
-	providedCompile (
-        libraries.'servlet-api',
-        libraries.'jsp-api'
+    providedCompile(
+            libraries.'servlet-api',
+            libraries.'jsp-api'
     )
 
-    compile (
-        project(':project-common'),
-        project(':project-business'),
+    compile(
+            project(':project-common'),
+            project(':project-business'),
 
-
-        //'xpp3:xpp3:1.1.4c',
+            libraries.'spring-webmvc',
 
     )
 
 }
 
-
-
 // 设置 snapshot war 版本号
 // 格式为： project-web-1.1.0.123-SNAPSHOT.war
-task setSnapshotWarVersion << {
-	println '== Snapshot begin....'
+task setSnapshotWarVersion {
 
-	def buildNumber = buildNumberIncrease()
-    version += '.' + buildNumber
-	version += '-SNAPSHOT'
+    doFirst {
 
-	println '-- Snapshot version: ' + version
+        println '== Snapshot begin....'
 
-	war {
-        manifest = defaultManifest(project)
+        println '================================================='
+        def buildNumber = buildNumberIncrease(project)
+        version += '.' + buildNumber
+        version += '-SNAPSHOT'
+        println ">> new version: ${version}"
+        println ">> war: ${archivesBaseName}-${version}.war"
+        println '================================================='
+
+        war {
+            manifest = defaultManifest(project)
+        }
     }
 }
 
 // 编译 snapshot 版的 war 包
-//
-// 如果需要用 grunt 打包，则将 grunt 至于依赖列表中，使其位于 war 前端：
-// task snapshot(dependsOn: ['setSnapshotWarVersion', 'grunt', 'war']) << {
-task snapshot(dependsOn: ['setSnapshotWarVersion', 'war']) << {
+task snapshot(dependsOn: ['setSnapshotWarVersion', 'war']) {
 
-	println '== Snapshot WAR Generate Over'
+    doLast {
+
+        println '== Snapshot WAR Generate Over'
+    }
 }
 
 //
 // 设置 release 包的版本号
 // 格式为: project-web-1.1.0.123.war
-task setReleaseWarVersion << {
-	println '== Release Begin...'
 
-	def buildNumber = buildNumberIncrease()
-    version += '.' + buildNumber
+task setReleaseWarVersion {
+    doFirst {
 
-    war {
-        manifest = defaultManifest(project)
+        println '== Release Begin...'
 
-        // 忽略一些文件夹
-        excludes = ['demo', 'static/js', 'static/css', 'static/less']
-    }
+        println '================================================='
+        def buildNumber = buildNumberIncrease(project)
+        version += '.' + buildNumber
+        println ">> new version: ${version}"
+        println ">> war: ${archivesBaseName}-${version}.war"
+        println '================================================='
 
-    // 设置资源文件夹
-    sourceSets {
-        main {
-            resources {
-                srcDirs = ["src/main/resources", "src/main/resources-prod"]
+        war {
+            manifest = defaultManifest(project)
+
+//        excludes = [
+//                'demo',
+//                //'static/js',
+//                'static/css',
+//                'static/less'
+//        ]
+        }
+
+        sourceSets {
+            main {
+                resources {
+                    srcDirs = ["src/main/resources", "src/main/resources-prod"]
+                }
             }
         }
     }
 }
 
-//
-// 编译发布用的 war 包
-task release(dependsOn: ['setReleaseWarVersion', 'war']) << {
-	println '== Release WAR Generate Over'
+task release(dependsOn: ['setReleaseWarVersion', 'war']) {
+    doLast {
+
+        println '== Release WAR Generate Over'
+    }
 }
 
 

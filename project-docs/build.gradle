@@ -1,0 +1,47 @@
+plugins {
+    id 'org.asciidoctor.convert' version '1.5.3'
+}
+
+apply plugin: 'org.asciidoctor.convert'
+
+archivesBaseName = 'mdis-docs'
+version = '1.0.0'
+
+asciidoctor {
+    doFirst {
+        // 每次编译需先删除此文件夹
+        delete 'preview'
+    }
+
+    logDocuments true
+    sources {
+        include 'index.adoc'
+    }
+    outputDir file('preview')
+
+    // 版本号
+    attributes 'revnumber': project.version
+
+    // TIP、NOTE 之类的用自体图标显示
+    // 之所以将此属性放置在这儿是为了避免 idea asciidoc 插件无法正常显示
+    attributes 'icons': 'font'
+
+    // 项目根路径
+    attributes 'rootDir': rootDir
+
+    // 几种常用的路径属性
+    attributes 'sourceDir': 'src/main/java'
+    attributes 'resourcesDir': 'src/main/resources'
+    attributes 'resourcesDevDir': 'src/main/resources-dev'
+    attributes 'webappDir': 'src/main/webapp'
+
+    // 将各个子项目属性设置到 attributes 中，以便在文档中使用
+    // 例如 include 其它子项目的源码
+    rootProject.allprojects.each { proj ->
+        // 忽略掉根项目
+        if (proj != rootProject) {
+            // 设置子项目路径，格式为：{mdis-core}
+            attributes "${proj.name}=${proj.projectDir}"
+        }
+    }
+}

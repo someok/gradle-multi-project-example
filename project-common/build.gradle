@@ -1,14 +1,7 @@
-apply plugin: 'maven'
 
 // jar包的名字
 archivesBaseName = 'project-common'
-
-eclipse {
-	project {
-		name = 'project-common'
-	}
-}
-
+version='1.0.0'
 
 dependencies {
 
@@ -16,12 +9,5 @@ dependencies {
         libraries.'servlet-api',
         libraries.'jsp-api',
     )
-}
-
-//
-// 重载 compileJava 方法，在java编译之后做 ebean 增强操作
-//
-compileJava.doLast {
-    ebeanEnhance(destinationDir, "com.example.model.*")
 }
 
