@@ -4,7 +4,7 @@ plugins {
 
 apply plugin: 'org.asciidoctor.convert'
 
-archivesBaseName = 'mdis-docs'
+archivesBaseName = 'example-docs'
 version = '1.0.0'
 
 asciidoctor {

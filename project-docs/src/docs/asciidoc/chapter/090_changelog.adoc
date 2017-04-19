@@ -1,0 +1,11 @@
+[#section-changelog]
+## 更新记录
+
+### v2.0
+
+* 优化 gradle 配置，去掉根目录 *build.gradle* 下的 `apply plugin: java`，以防止 idea 将根目录也作为 module
+* 增加 *asciidoc* 来编写项目文档，并可编译生成 html5，编译命令为 `gradle asciidoctor`
+
+### v1.0
+
+* 初始完成此多项目示例

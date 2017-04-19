@@ -1,0 +1,10 @@
+[#section-desc]
+## 概述
+
+此 *多项目示例* 项目是将几个项目放在了一起，并采用 {gradle} 打包工具来管理整个项目。
+
+采用的是 Gradle 的多项目结构。
+
+本文档采用 *ascii* 编写，并采用 `gradle asciidoctor` 编译生成 html5 格式文档。
+
+相比 *markdown*，*asciidoc* 有着更多的格式控制，当然，复杂度也增加了不少。

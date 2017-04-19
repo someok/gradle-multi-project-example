@@ -45,7 +45,7 @@ task setSnapshotWarVersion {
         println '== Snapshot begin....'
 
         println '================================================='
-        def buildNumber = buildNumberIncrease(project)
+        def buildNumber = buildNumberIncrease([project: project, numFilename: 'build_number.data'])
         version += '.' + buildNumber
         version += '-SNAPSHOT'
         println ">> new version: ${version}"
@@ -53,7 +53,13 @@ task setSnapshotWarVersion {
         println '================================================='
 
         war {
-            manifest = defaultManifest(project)
+            excludes = ['**/rebel.xml', '**/.keep']
+
+            manifest = defaultManifest([
+                    project: project,
+                    version: version,
+                    projectVendor: project_vendor
+            ])
         }
     }
 }
@@ -77,21 +83,21 @@ task setReleaseWarVersion {
         println '== Release Begin...'
 
         println '================================================='
-        def buildNumber = buildNumberIncrease(project)
+        def buildNumber = buildNumberIncrease([project: project, numFilename: 'build_number.data'])
         version += '.' + buildNumber
         println ">> new version: ${version}"
         println ">> war: ${archivesBaseName}-${version}.war"
         println '================================================='
 
         war {
-            manifest = defaultManifest(project)
+            excludes = ['**/rebel.xml', '**/.keep']
 
-//        excludes = [
-//                'demo',
-//                //'static/js',
-//                'static/css',
-//                'static/less'
-//        ]
+            manifest = defaultManifest([
+                    project: project,
+                    version: version,
+                    projectVendor: project_vendor
+            ])
+
         }
 
         sourceSets {

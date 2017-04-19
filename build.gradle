@@ -2,73 +2,6 @@
 	gradle 主文件
  */
 
-import java.text.SimpleDateFormat
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Settings
-ext {
-    // Project constants
-    project_group = 'com.example'
-    project_name = 'OneLevelProjects'
-
-    project_jdk = '1.8'
-    project_web = '3.0'
-
-    /** 生成 manifest 的方法，在打 jar 包或者 war 包时候调用 */
-    defaultManifest = { proj ->
-
-        return manifest {
-            def buildTimeAndDate = new Date()
-            def buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
-            def buildTime = new SimpleDateFormat('HH:mm').format(buildTimeAndDate)
-
-            def git_cmd = "git rev-parse HEAD"
-            def git_proc = git_cmd.execute()
-
-            attributes 'SCM-Revision': git_proc.text.trim()
-
-            attributes 'Built-By': System.properties['user.name']
-            attributes 'Created-By': System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.getProperty("java.vm.version") + ")"
-            attributes 'Build-Host': InetAddress.localHost.hostName
-            attributes 'Build-Date': buildDate
-            attributes 'Build-Time': buildTime
-            attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
-            attributes 'Specification-Title': proj.archivesBaseName
-            attributes 'Specification-Version': proj.version
-            attributes 'Specification-Vendor': project_group
-            attributes 'Implementation-Title': proj.archivesBaseName
-            attributes 'Implementation-Version': proj.version
-            attributes 'Implementation-Vendor': project_group
-            attributes 'provider': 'gradle'
-        }
-    }
-
-    /**
-     * 子项目中调用，用于生成编译数字，此数字可以作为版本号的一个组成部分。
-     *
-     * 存储位置为子项目下的 build_number.data,此文件与子项目的 build.gradle 平级
-     */
-    buildNumberIncrease = { proj ->
-        println ">> project path: ${proj.projectDir}"
-
-        def _build_number_file = new File(proj.projectDir, 'build_number.data')
-        def buildNumber = _build_number_file.text.toInteger()
-
-        println '>> Old build number: ' + _build_number_file.text
-        buildNumber++
-        println '>> New build number: ' + buildNumber
-
-        _build_number_file.text = buildNumber
-
-        return buildNumber
-
-    }
-
-}
-
-apply plugin: 'idea'
-apply plugin: 'java'
-
 //
 // 引入jar包定义
 // 这个文件中定义的jar包可以直接在子项目中使用，不需要再次使用 apply from 这个语句
@@ -77,18 +10,15 @@ apply from: 'dependency.gradle'
 
 allprojects {
     //apply plugin: 'license'
+    repositories {
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+//        mavenCentral()
+    }
 }
 
 subprojects { subproj ->
 
-    //group = project_group
-    // 这儿置为空值，否则 idea 生成的依赖包命名以此值开始
-    // 与 gradle 的打包规则有冲突
-    group = ""
-
     apply plugin: 'java'
-    sourceCompatibility = project_jdk
-    targetCompatibility = project_jdk
 
     apply plugin: 'idea'
     apply plugin: 'eclipse'
@@ -96,17 +26,25 @@ subprojects { subproj ->
     // 用于发布 jar 包到相应服务器
     apply plugin: 'maven'
 
-    repositories {
-        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
-//        mavenCentral()
-    }
+    // 由于根下屏蔽了 java 插件，所以把这些方法定义转移到各个子项目下读取
+    apply from: "https://gist.githubusercontent.com/someok/43d4ea94ea9db7e760a3108aae870913/raw/0d9a6f2e95815646e202e0244f58a34b89d00f98/utils.gradle"
+
+
+    group = project_group
+
+    sourceCompatibility = project_jdk
+    targetCompatibility = project_jdk
+
 
     jar {
         excludes = ['**/rebel.xml', '**/.keep']
 
         doFirst {
             // 生成jar 包的时候按此规则生成 manifest 文件
-            manifest = defaultManifest({ subproj })
+            manifest = defaultManifest([
+                    project: subproj,
+                    projectVendor: project_vendor
+            ])
         }
     }
 

@@ -1,8 +1,11 @@
 rootProject.name = 'multi-projects'
 
-// 三个子项目
+// 四个子项目
 // 其中 business 依赖 common
 // web 依赖前两者
+//
+// docs 是采用 asciidoc 编写文档
 include 'project-common'
 include 'project-business'
 include 'project-web'
+include 'project-docs'
