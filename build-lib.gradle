@@ -1,0 +1,193 @@
+ext.versions = [logback               : '1.4.14',
+                slf4j                 : '2.0.9',
+                jackson               : '2.11.2',
+                springdoc             : '2.2.0',
+                jjwt                  : '0.11.5',
+                saToken               : '1.37.0',
+                twelveMonkeys         : '3.10.1',
+]
+
+ext.libraries = [
+
+    "mysql"                                                   : "mysql:mysql-connector-java",
+    "postgresql"                                              : "org.postgresql:postgresql",
+    "mssql"                                                   : "com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre11",
+    'HikariCP'                                                : 'com.zaxxer:HikariCP:5.1.0',
+    'p6spy'                                                   : 'p6spy:p6spy:3.9.1',
+
+    'okhttp'                                                  : 'com.squareup.okhttp3:okhttp:4.10.0',
+    'forest-spring-boot-starter'                              : 'com.dtflys.forest:forest-spring-boot3-starter:1.5.35',
+
+    // sa-token
+    "sa-token-spring-boot-starter"                            : "cn.dev33:sa-token-spring-boot3-starter:${versions.saToken}",
+    'sa-token-jwt'                                            : "cn.dev33:sa-token-jwt:${versions.saToken}",
+    'sa-token-oauth2'                                         : "cn.dev33:sa-token-oauth2:${versions.saToken}",
+//    'sa-token-redis'                                          : "cn.dev33:sa-token-redis:${versions.saToken}",
+    'sa-token-redis'                                          : "cn.dev33:sa-token-redis-jackson:${versions.saToken}",
+    'commons-pool2'                                           : 'org.apache.commons:commons-pool2',
+
+    'aws-s3'                                                  : 'software.amazon.awssdk:s3:2.20.140',
+
+    // mybatis
+    "mybatis-plus-boot-starter"                               : "com.baomidou:mybatis-plus-spring-boot3-starter:3.5.5",
+//    'mybatis-spring-boot-starter'         : 'org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2',
+
+    // spring boot
+    'spring-boot-starter-cache'                               : 'org.springframework.boot:spring-boot-starter-cache',
+    'spring-boot-starter-data-jpa'                            : 'org.springframework.boot:spring-boot-starter-data-jpa',
+    'spring-boot-starter-data-mongodb'                        : 'org.springframework.boot:spring-boot-starter-data-mongodb',
+    'spring-boot-starter-thymeleaf'                           : 'org.springframework.boot:spring-boot-starter-thymeleaf',
+    'spring-boot-starter-web'                                 : 'org.springframework.boot:spring-boot-starter-web',
+    'spring-boot-starter-websocket'                           : 'org.springframework.boot:spring-boot-starter-websocket',
+    'spring-boot-starter-mail'                                : 'org.springframework.boot:spring-boot-starter-mail',
+    'spring-boot-starter-actuator'                            : 'org.springframework.boot:spring-boot-starter-actuator',
+    'spring-boot-devtools'                                    : 'org.springframework.boot:spring-boot-devtools',
+    'spring-boot-starter-tomcat'                              : 'org.springframework.boot:spring-boot-starter-tomcat',
+    'spring-boot-starter-validation'                          : 'org.springframework.boot:spring-boot-starter-validation',
+    'spring-boot-starter-jdbc'                                : 'org.springframework.boot:spring-boot-starter-jdbc',
+    'spring-boot-starter-quartz'                              : 'org.springframework.boot:spring-boot-starter-quartz',
+    'spring-boot-starter-data-elasticsearch'                  : 'org.springframework.boot:spring-boot-starter-data-elasticsearch',
+
+    'spring-boot-admin-starter-server'                        : 'de.codecentric:spring-boot-admin-starter-server:2.1.1',
+    'spring-boot-admin-starter-client'                        : 'de.codecentric:spring-boot-admin-starter-client:2.1.1',
+
+    'thymeleaf-layout-dialect'                                : 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.3.0',
+
+    // Spring Boot Test
+    'spring-boot-starter-test'                                : 'org.springframework.boot:spring-boot-starter-test',
+
+    // Spring Security
+    'spring-boot-starter-security'                            : 'org.springframework.boot:spring-boot-starter-security',
+    'spring-boot-starter-oauth2-client'                       : 'org.springframework.boot:spring-boot-starter-oauth2-client',
+    'spring-boot-starter-oauth2-resource-server'              : 'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
+    'spring-cloud-starter-oauth2'                             : 'org.springframework.cloud:spring-cloud-starter-oauth2',
+    'spring-security-test'                                    : 'org.springframework.security:spring-security-test',
+
+    // springdoc
+    'springdoc-openapi-ui'                                    : "org.springdoc:springdoc-openapi-starter-webmvc-ui:${versions.springdoc}",
+    'springdoc-openapi-javadoc'                               : "org.springdoc:springdoc-openapi-javadoc:${versions.springdoc}",
+    'springdoc-openapi-webflux-ui'                            : "org.springdoc:springdoc-openapi-webflux-ui:${versions.springdoc}",
+    'springdoc-openapi-core'                                  : 'org.springdoc:springdoc-openapi-core:1.1.49',
+
+    // redis
+    'spring-boot-starter-data-redis'                          : 'org.springframework.boot:spring-boot-starter-data-redis',
+    'lettuce-core'                                            : 'io.lettuce:lettuce-core:6.3.0.RELEASE',
+
+    // 忽略common log，使用slf4j代替
+    //
+    "logback-classic"                                         : "ch.qos.logback:logback-classic:${versions.logback}",
+    "logback-core"                                            : "ch.qos.logback:logback-core:${versions.logback}",
+    "jcl-over-slf4j"                                          : "org.slf4j:jcl-over-slf4j:${versions.slf4j}",
+    "log4j-over-slf4j"                                        : "org.slf4j:log4j-over-slf4j:${versions.slf4j}",
+    "slf4j-api"                                               : "org.slf4j:slf4j-api:${versions.slf4j}",
+
+    // jackson
+    "jackson-core"                                            : "com.fasterxml.jackson.core:jackson-core:${versions.jackson}",
+    "jackson-databind"                                        : "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}",
+
+    // Apache
+    //
+    "commons-beanutils-core"                                  : "commons-beanutils:commons-beanutils-core:1.8.3",
+    "commons-lang3"                                           : "org.apache.commons:commons-lang3:3.14.0",
+    "commons-codec"                                           : "commons-codec:commons-codec:1.16.0",
+    "commons-collections"                                     : "commons-collections:commons-collections:3.2.2",
+    "commons-text"                                            : "org.apache.commons:commons-text:1.9",
+
+    "commons-fileupload"                                      : "commons-fileupload:commons-fileupload:1.5",
+    "commons-io"                                              : "org.apache.commons:commons-io:1.3.2",
+    "commons-compress"                                        : "org.apache.commons:commons-compress:1.23.0",
+    "velocity"                                                : "org.apache.velocity:velocity-engine-core:2.0",
+    "httpclient"                                              : "org.apache.httpcomponents:httpclient:4.5.13",
+
+    // file storage
+    // x-file-storage 依赖可参考 https://x-file-storage.xuyanwu.cn/
+    "x-file-storage-spring"                                   : "org.dromara.x-file-storage:x-file-storage-spring:2.0.0",
+    "aws-java-sdk-s3"                                         : "com.amazonaws:aws-java-sdk-s3:1.12.625",
+    "aliyun-sdk-oss"                                          : "com.aliyun.oss:aliyun-sdk-oss:3.17.3",
+    "cos_api"                                                 : "com.qcloud:cos_api:5.6.191",
+
+    "tika-core"                                               : "org.apache.tika:tika-core:2.9.0",
+
+    "jxls-core"                                               : "net.sf.jxls:jxls-core:1.0.5",
+    "jxls-reader"                                             : "net.sf.jxls:jxls-reader:1.0.5",
+
+    // Cache
+    //
+    "ehcache"                                                 : "net.sf.ehcache:ehcache:2.10.6",
+    "caffeine"                                                : "com.github.ben-manes.caffeine:caffeine:3.1.8",
+
+    // Other
+    //
+    "thumbnailator"                                           : "net.coobird:thumbnailator:0.4.12",
+    "easy-captcha"                                            : "com.github.whvcse:easy-captcha:1.6.2",
+
+    // hutool
+    "hutool-core"                                             : "cn.hutool:hutool-core:5.8.24",
+
+    "jpinyin"                                                 : "com.github.stuxuhai:jpinyin:1.1.8",
+
+    // jjwt
+    "jjwt-api"                                                : "io.jsonwebtoken:jjwt-api:${versions.jjwt}",
+    "jjwt-impl"                                               : "io.jsonwebtoken:jjwt-impl:${versions.jjwt}",
+    "jjwt-jackson"                                            : "io.jsonwebtoken:jjwt-jackson:${versions.jjwt}",
+
+    // Test
+    "junit"                                                   : "org.junit.jupiter:junit-jupiter:5.10.1",
+    "assertj"                                                 : "org.assertj:assertj-core:3.24.2",
+    "hamcrest-library"                                        : "org.hamcrest:hamcrest-library:1.3",
+
+    // 此版本不能随便升级，需要跟 powermock 一起升级，防止后者不支持
+    "mockito-core"                                            : "org.mockito:mockito-core:2.8.9",
+    "powermock-module-junit4"                                 : "org.powermock:powermock-module-junit4:1.7.1",
+    "powermock-api-mockito2"                                  : "org.powermock:powermock-api-mockito2:1.7.1",
+    "json-path"                                               : "com.jayway.jsonpath:json-path:2.4.0",
+    "greenmail"                                               : "com.icegreen:greenmail:1.6.1",
+    "greenmail-junit5"                                        : "com.icegreen:greenmail-junit5:1.6.1",
+    "awaitility"                                              : "org.awaitility:awaitility:4.2.0",
+
+    // xml解析
+    "json-lib"                                                : "net.sf.json-lib:json-lib:2.2.1:jdk15",
+    "xom"                                                     : "xom:xom:1.3.8",
+
+    // excel 导入导出
+    "easyexcel"                                               : "com.alibaba:easyexcel:3.3.3",
+
+    // csv 导入导出
+    "commons-csv"                                             : "org.apache.commons:commons-csv:1.10.0",
+
+    // rsa
+    "bcprov-jdk15on"                                          : "org.bouncycastle:bcprov-jdk15on:1.68",
+    "bcpg-jdk15on"                                            : "org.bouncycastle:bcpg-jdk15on:1.68",
+    "bcpkix-jdk15on"                                          : "org.bouncycastle:bcpkix-jdk15on:1.68",
+
+    // aws
+    "aws-java-sdk-core"                                       : "com.amazonaws:aws-java-sdk-core:1.12.21",
+
+    "jave"                                                    : "com.github.dadiyang:jave:1.0.5",
+    "dynamic-datasource"                                      : 'com.baomidou:dynamic-datasource-spring-boot-starter:3.4.1',
+
+    // 判断文件编码
+    "juniversalchardet"                                       : "com.github.albfernandez:juniversalchardet:2.4.0",
+
+    // quartz
+    "quartz"                                                  : "org.quartz-scheduler:quartz:2.3.2",
+
+    // 腾讯音视频
+    "tencentcloud-sdk-java"                                   : "com.tencentcloudapi:tencentcloud-sdk-java:4.0.11",
+
+    // pdf
+    "itextpdf"                                                : 'com.itextpdf:itextpdf:5.5.13.3',
+    "itext-asian"                                             : 'com.itextpdf:itext-asian:5.2.0',
+
+    'hashids'                                                 : 'org.hashids:hashids:1.0.3',
+    "ip2region"                                               : "org.lionsoul:ip2region:2.7.0",
+
+    // user-agent
+    "uap-java"                                                : "com.github.ua-parser:uap-java:1.6.1",
+
+    // 增加图片支持
+    "batik-all"                                               : "org.apache.xmlgraphics:batik-all:1.17",
+    "twelvemonkeys-imageio-webp"                              : "com.twelvemonkeys.imageio:imageio-webp:${versions.twelveMonkeys}",
+    "twelvemonkeys-imageio-batik"                             : "com.twelvemonkeys.imageio:imageio-batik:${versions.twelveMonkeys}",
+
+]

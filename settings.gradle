@@ -1,11 +1,15 @@
-rootProject.name = 'multi-projects'
+rootProject.name = 'gradle-multi-project-example'
 
-// 四个子项目
-// 其中 business 依赖 common
-// web 依赖前两者
-//
-// docs 是采用 asciidoc 编写文档
-include 'project-common'
-include 'project-business'
-include 'project-web'
-include 'project-docs'
+include 'modules:application'
+
+file("${rootDir}/modules/shared").eachDirMatch(~/.*/) {
+    include "modules:shared:${it.name}"
+}
+
+file("${rootDir}/modules/core").eachDirMatch(~/.*/) {
+    include "modules:core:${it.name}"
+}
+
+file("${rootDir}/modules/extra").eachDirMatch(~/.*/) {
+    include "modules:extra:${it.name}"
+}

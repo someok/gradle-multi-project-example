@@ -1,0 +1,73 @@
+import java.text.SimpleDateFormat
+
+ext {
+
+    /**
+     * 定义 manifest 文件输出内容。
+     *
+     * 调用方式：
+     * jar {
+     *     doFirst {
+     *          manifest = defaultManifest([project: project, projectVendor: project_vendor])
+     *      }
+     *  }
+     */
+    defaultManifest = {args ->
+        def proj = args.project
+        def projectVendor = args.projectVendor
+        // 如果未传入 version 参数，则默认采用传入的 proj 的属性
+        def projectVersion = args.version ? args.version :  proj.version
+
+        return manifest {
+            def buildTimeAndDate = new Date()
+            def buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
+            def buildTime = new SimpleDateFormat('HH:mm').format(buildTimeAndDate)
+
+            def git_cmd = "git rev-parse HEAD"
+            def git_proc = git_cmd.execute()
+
+            attributes 'SCM-Revision': git_proc.text.trim()
+
+            attributes 'Built-By': System.properties['user.name']
+            attributes 'Created-By': System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.getProperty("java.vm.version") + ")"
+            attributes 'Build-Host': InetAddress.localHost.hostName
+            attributes 'Build-Date': buildDate
+            attributes 'Build-Time': buildTime
+            attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
+            attributes 'Specification-Title': proj.archivesBaseName
+            attributes 'Specification-Version': projectVersion
+            attributes 'Specification-Vendor': projectVendor
+            attributes 'Implementation-Title': proj.archivesBaseName
+            attributes 'Implementation-Version': projectVersion
+            attributes 'Implementation-Vendor': projectVendor
+            attributes 'provider': 'gradle'
+        }
+    }
+
+    /**
+     * 根据给定文件中的数字自动加一，一般用于生产版本号后面的编译数字。
+     *
+     * 调用方式：
+     * def buildNumber = buildNumberIncrease([project: project, numFilename: 'build_number.data'])
+     * version += '.' + buildNumber
+     */
+    buildNumberIncrease = { args ->
+        def proj = args.project
+        def numFilename = args.numFilename
+
+        println ">> project path: ${proj.projectDir}"
+
+        def _build_number_file = new File(proj.projectDir, numFilename)
+        def buildNumber = _build_number_file.text.toInteger()
+
+        println '>> Old build number: ' + _build_number_file.text
+        buildNumber++
+        println '>> New build number: ' + buildNumber
+
+        _build_number_file.text = buildNumber
+
+        return buildNumber
+
+    }
+
+}

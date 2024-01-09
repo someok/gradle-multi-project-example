@@ -1,148 +1,129 @@
-/*
-	gradle 主文件
- */
+//file:noinspection DependencyNotationArgument
+//file:noinspection GrUnresolvedAccess
+buildscript {
+    repositories {
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url "https://maven.aliyun.com/repository/public" }
 
-//
-// 引入jar包定义
-// 这个文件中定义的jar包可以直接在子项目中使用，不需要再次使用 apply from 这个语句
-//
-apply from: 'dependency.gradle'
+        mavenCentral()
+    }
+    dependencies {
+    }
+}
+
+plugins {
+    id 'idea'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.1' apply false
+    id 'io.spring.dependency-management' version '1.1.4' apply false
+
+    id 'com.github.ben-manes.versions' version '0.50.0'
+    id "com.gorylenko.gradle-git-properties" version "2.4.1" apply false
+}
+
+apply from: 'build-lib.gradle'
 
 allprojects {
-    //apply plugin: 'license'
     repositories {
-        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
-//        mavenCentral()
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url "https://maven.aliyun.com/repository/public" }
+        mavenCentral()
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
 
 subprojects { subproj ->
 
-    apply plugin: 'java'
+    // 父级目录不作为项目模块
+    def isSkipModule = ['modules', 'core', 'extra', 'shared'].contains(subproj.name)
 
-    apply plugin: 'idea'
-    apply plugin: 'eclipse'
-
-    // 用于发布 jar 包到相应服务器
-    apply plugin: 'maven'
-
-    // 由于根下屏蔽了 java 插件，所以把这些方法定义转移到各个子项目下读取
-    apply from: "https://gist.githubusercontent.com/someok/43d4ea94ea9db7e760a3108aae870913/raw/0d9a6f2e95815646e202e0244f58a34b89d00f98/utils.gradle"
-
-
-    group = project_group
-
-    sourceCompatibility = project_jdk
-    targetCompatibility = project_jdk
-
-
-    jar {
-        excludes = ['**/rebel.xml', '**/.keep']
-
-        doFirst {
-            // 生成jar 包的时候按此规则生成 manifest 文件
-            manifest = defaultManifest([
-                    project: subproj,
-                    projectVendor: project_vendor
-            ])
-        }
+    if (isSkipModule) {
+        println("📛skip ${subproj.name}")
+        return
     }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from 'build/docs/javadoc'
-        doFirst {
-            manifest = defaultManifest({ subproj })
-        }
-    }
+    apply from: "${rootDir}/build-ext.gradle"
 
-    task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-        doFirst {
-            manifest = defaultManifest({ subproj })
-        }
-    }
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
-    // 编码改为 UTF-8, 否则编译源码的时候会出错
-    // 当然，这个需要根据自己的 java 源码的编码进行调整
-    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+    sourceCompatibility = '17'
 
-    //
-    artifacts {
-        archives jar
-        // archives javadocJar
-        archives sourcesJar
-    }
+    // 重命名 jar 包，格式为：项目名-模块名-子模块名-版本号.jar
+    archivesBaseName = subproj.path.replace(':modules:', rootProject.name + '-').replace(':', '-')
 
     configurations {
-
-        deployerJars
-
-        //
-        // 所有需要忽略的包定义在此
-        //
-        all*.exclude group: 'commons-httpclient'
-        all*.exclude group: 'commons-logging'
-        all*.exclude group: 'commons-beanutils', module: 'commons-beanutils'
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
     }
 
     dependencies {
-        // 用于上传自己项目的jar 包到中心 maven 库
-        deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
+        // 兼容 jetbrains annotations，只在编译期有效
+        compileOnly 'org.jetbrains:annotations:24.1.0'
 
-        //
-        // 通用依赖
-        //
-        compile(
-                libraries.'logback-classic',
-                libraries.'jcl-over-slf4j',
-                libraries.'log4j-over-slf4j',
-        )
+        implementation libraries.'logback-classic'
+        implementation libraries.'jcl-over-slf4j'
+        implementation libraries.'log4j-over-slf4j'
 
-        //
-        // 引入根目录和各子项目下的libs中的jar包
-        //
-        ext.jarTree = fileTree(dir: 'libs', include: '**/*.jar')
-        ext.rootProjectLibs = new File(rootProject.rootDir, 'libs').getAbsolutePath()
-        ext.jarTree += fileTree(dir: rootProjectLibs, include: '**/*.jar')
+        implementation libraries.'commons-lang3'
+        implementation libraries.'commons-io'
+        implementation libraries.'commons-codec'
+        implementation libraries.'commons-beanutils-core'
 
-        compile jarTree
 
-        //
-        // 测试依赖
-        //
-        testCompile(
-                libraries.'junit',
-                libraries.'spring-test',
-                libraries.'assertj',
-                libraries.'mockito-core',
-        )
+        implementation libraries.'spring-boot-starter-validation'
+        implementation libraries.'spring-boot-starter-web'
+        implementation libraries.'spring-boot-starter-cache'
+        implementation libraries.'spring-boot-starter-thymeleaf'
+        implementation libraries.'spring-boot-starter-actuator'
+        developmentOnly libraries.'spring-boot-devtools'
+
+        runtimeOnly libraries.'postgresql'
+        runtimeOnly libraries.'HikariCP'
+
+        // springdoc begin
+        implementation libraries.'springdoc-openapi-ui'
+        annotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0'
+        // Runtime library
+        implementation 'com.github.therapi:therapi-runtime-javadoc:0.15.0'
+        // springdoc end
+
+
+        // test
+        testImplementation libraries.'junit'
+        testImplementation libraries.'assertj'
+        testImplementation libraries.'awaitility'
+        testImplementation libraries.'greenmail'
+        testImplementation libraries.'greenmail-junit5'
+        testImplementation libraries.'spring-boot-starter-test'
+
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     }
 
-    // 上传 jar 包到自己的 maven 服务器
-    //
-    uploadArchives {
+    if (!subproj.name.startsWith('application')) {
+        // 不打成 Spring Boot 格式的 jar 包
+        jar {
+            enabled = true
+        }
 
-        repositories.mavenDeployer {
-            //beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            configuration = configurations.deployerJars
-            repository(
-                    // 这儿需要注意，后面的地址是服务器地址，需要写全，是个大坑啊
-                    // 另外初次执行的时候最好带上 --info 参数，会提示保存 ssh 验证信息的
-                    // 这时候需要输入 yes
-                    //
-                    // 更详细说明参见我的 blog: http://my.oschina.net/someok/blog/374562
-                    url: //"file://d:/Develop/MyProjects/repos/"
-                            "scp://repos.example.com:22/home/maven/repos/release"
-            )
-                    {
-                        // If these are not defined assemble needlessly fails for unrelated tasks, hence, defaultBlank.
-                        authentication(userName: "maven", password: "maven")
-                    }
-
+        bootJar {
+            enabled = false
         }
     }
 
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }
 
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}

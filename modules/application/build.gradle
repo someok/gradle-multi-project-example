@@ -1,0 +1,29 @@
+apply plugin: 'com.gorylenko.gradle-git-properties'
+
+springBoot {
+    // 生成 build info: /BOOT-INF/classes/META-INF/build-info.properties
+    buildInfo()
+}
+
+tasks.register("increaseVersionBuildNumber") {
+    doLast {
+        // 在打 war 包的时候增加个当前时间戳的编译版本号
+        println '================================================='
+        def buildNumber = new Date().format("yyyyMMddHHmm")
+        // buildNumberIncrease([project: project, numFilename: 'build_number.data'])
+        version += '.' + buildNumber
+        println ">> new version: ${version}"
+        println ">> jar: ${archivesBaseName}-${version}.jar"
+        println '================================================='
+    }
+}
+
+bootJar {
+    dependsOn increaseVersionBuildNumber
+}
+
+dependencies {
+    implementation project(':modules:shared:utils')
+    implementation project(':modules:core:business')
+    implementation project(':modules:extra:demo')
+}
